@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>OpenCounsel — pricing</title>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">OpenCounsel</div>
+    <nav class="nav"><a href="index.html">Workbench</a></nav>
+  </header>
+  <div class="hero">
+    <div>
+      <div class="kicker">Sellable plans</div>
+      <h1>Pay for the desk. The citator stays honest.</h1>
+      <p class="lead">Public CiteLock is free. Saved files and clinic supervision are paid. Not a law firm.</p>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="tile"><h3>Public</h3><p class="cite">$0</p><p>CiteLock + two playbooks. No saved workspace.</p><p><a class="btn" href="index.html">Open workbench</a></p></div>
+    <div class="tile"><h3>Pro</h3><p class="cite">$19 / month</p><p>Saved matters. Export after CiteLock passes.</p><p><button class="btn gold" data-plan="pro">Start Pro</button></p></div>
+    <div class="tile"><h3>Clinic</h3><p class="cite">$149 / month</p><p>Supervision queue. Volunteer seats.</p><p><button class="btn gold" data-plan="clinic">Start Clinic</button></p></div>
+  </div>
+  <p class="disclaimer" id="bill-status">If you see billing_not_configured, STRIPE_SECRET_KEY is missing on the host.</p>
+</div>
+<script>
+document.querySelectorAll("[data-plan]").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const status = document.getElementById("bill-status");
+    status.textContent = "Opening Stripe…";
+    try {
+      const r = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: btn.dataset.plan })
+      });
+      const data = await r.json();
+      if (data.url) { location.href = data.url; return; }
+      status.textContent = (data.error || "error") + (data.detail ? " — " + data.detail : "");
+    } catch (err) { status.textContent = String(err); }
+  });
+});
+</script>
+</body>
+</html>
