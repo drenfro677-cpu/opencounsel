@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OpenCounsel — public OS for self-representation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,550;9..144,700&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="landing">
+  <div class="topbar">
+    <div class="brand"><span class="mark">O</span> OpenCounsel</div>
+    <div>
+      <button class="btn ghost" onclick="enterApp('litigant')">Litigant workbench</button>
+      <button class="btn gold" onclick="enterApp('clinic')">Clinic desk</button>
+    </div>
+  </div>
+  <div class="hero">
+    <div>
+      <div class="kicker">For courts · legal aid · self-represented parties</div>
+      <h1>The clerk, the citator, and the rehearsal room — in one public tool.</h1>
+      <p class="lead">CoCounsel was built for firms buying Westlaw. OpenCounsel is built for the person who was served last Tuesday and cannot pay $639 a month.</p>
+      <p><button class="btn gold" onclick="enterApp('litigant')">Open sample files</button></p>
+      <p class="disclaimer">Not a law firm. Not legal advice. CiteLock will not export a filing until every citation resolves to a CourtListener opinion. You are responsible for every word you file.</p>
+    </div>
+    <div class="hero-card">
+      <h3 class="serif" style="margin-top:0">What this build ships</h3>
+      <table class="cmp">
+        <tr><td>Live research</td><td>CourtListener opinion search</td></tr>
+        <tr><td>CiteLock</td><td>Real lookup · blocked if no cluster</td></tr>
+        <tr><td>Playbooks</td><td>Consumer debt + eviction</td></tr>
+        <tr><td>Clinic desk</td><td>Supervision queue + cite scores</td></tr>
+        <tr><td>Price to the public</td><td>$0 / $19 — not $639</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>Live API</b><span>CourtListener v4 search</span></div>
+    <div class="stat"><b>2 playbooks</b><span>Debt defense · eviction</span></div>
+    <div class="stat"><b>CiteLock</b><span>No cluster, no export</span></div>
+    <div class="stat"><b>Clinic</b><span>Staff can see every draft</span></div>
+  </div>
+  <div class="section">
+    <div class="kicker">Why courts should care</div>
+    <h2>Fewer phantom cases. Cleaner packets. Same Friday.</h2>
+    <div class="grid3">
+      <div class="tile"><h3>Hallucinated cites are already being sanctioned</h3><p>OpenCounsel refuses to print a citation that does not resolve to a public opinion record.</p></div>
+      <div class="tile"><h3>Most pro se volume is a handful of case types</h3><p>Debt and eviction first. Forms, notices, and the first court date — not a research memo.</p></div>
+      <div class="tile"><h3>Legal aid can supervise instead of retype</h3><p>The clinic desk shows jurisdiction, deadline risk, and CiteLock status before a volunteer touches the file.</p></div>
+    </div>
+  </div>
+</div>
+<div id="app" class="hidden">
+  <aside class="sidebar">
+    <div class="side-brand"><span class="mark">O</span> OpenCounsel</div>
+    <div class="switch">
+      <button id="sw-debt" class="on" onclick="setPlaybook('debt')">Debt</button>
+      <button id="sw-evict" onclick="setPlaybook('evict')">Eviction</button>
+      <button id="sw-clinic" onclick="setPlaybook('clinic')">Clinic</button>
+    </div>
+    <div class="side-case" id="side-meta"></div>
+    <nav class="side-nav" id="nav-lit">
+      <button class="active" data-view="home" onclick="showView('home',this)">Case home</button>
+      <button data-view="research" onclick="showView('research',this)">Research (live)</button>
+      <button data-view="draft" onclick="showView('draft',this)">Draft</button>
+      <button data-view="citelock" onclick="showView('citelock',this)">CiteLock (live)</button>
+      <button data-view="calendar" onclick="showView('calendar',this)">Deadlines</button>
+      <button data-view="hearing" onclick="showView('hearing',this)">Hearing room</button>
+      <button data-view="evidence" onclick="showView('evidence',this)">Evidence</button>
+      <button data-view="help" onclick="showView('help',this)">Aid & clerk</button>
+    </nav>
+    <nav class="side-nav hidden" id="nav-clinic">
+      <button class="active" data-view="clinic" onclick="showView('clinic',this)">Supervision queue</button>
+      <button data-view="research" onclick="showView('research',this)">Research</button>
+      <button data-view="citelock" onclick="showView('citelock',this)">CiteLock</button>
+    </nav>
+    <button class="btn ghost" style="margin:16px;color:#fff;border-color:#314556" onclick="leaveApp()">← Product home</button>
+  </aside>
+  <main class="main">
+    <div class="banner">Not legal advice · Sample facts are fictional · Live results come from CourtListener (Free Law Project) · Open the opinion and read it before you cite it.</div>
+    <section id="view-home"></section>
+    <section id="view-research" class="hidden">
+      <h2 class="page">Research — CourtListener</h2>
+      <p class="sub">Queries hit the public CourtListener v4 search API. An out-of-state hit is information, not authority.</p>
+      <div class="search-box">
+        <input id="q" class="input" value="Henson v. Santander" />
+        <button class="btn" onclick="runSearch()">Search opinions</button>
+      </div>
+      <p id="search-meta" class="sub"></p>
+      <div id="results"></div>
+    </section>
+    <section id="view-draft" class="hidden"></section>
+    <section id="view-citelock" class="hidden">
+      <h2 class="page">CiteLock — live lookup</h2>
+      <p class="sub">Paste a citation or a draft. No matching cluster → blocked. A mention inside some other opinion is not enough for export.</p>
+      <label>Citations or draft text</label>
+      <textarea id="cite-text">Henson v. Santander Consumer USA Inc., 582 U.S. 79 (2017)
+Unifund CCR Partners v. Shah, 2013 IL App (1st) 113286
+Smith v. Acme Collections, 2022 IL App 99999
+Brown v. Board of Education, 347 U.S. 483 (1954)</textarea>
+      <p><button class="btn gold" onclick="runCiteLock()">Verify against CourtListener</button></p>
+      <div id="cite-out"></div>
+      <p id="export-row"></p>
+    </section>
+    <section id="view-calendar" class="hidden"></section>
+    <section id="view-hearing" class="hidden"></section>
+    <section id="view-evidence" class="hidden"></section>
+    <section id="view-help" class="hidden"></section>
+    <section id="view-clinic" class="hidden">
+      <h2 class="page">Clinic supervision desk</h2>
+      <p class="sub">Staff see risk before they spend a volunteer hour.</p>
+      <div class="cards" style="margin-bottom:16px">
+        <div class="card"><h3>On desk today</h3><p style="font-size:28px;font-family:Fraunces,serif;margin:4px 0">7</p><p>3 debt · 3 eviction · 1 family packet</p></div>
+        <div class="card"><h3>CiteLock red</h3><p style="font-size:28px;font-family:Fraunces,serif;margin:4px 0">2</p><p>Export blocked until the fake cite is cut</p></div>
+        <div class="card"><h3>Deadline < 5 days</h3><p style="font-size:28px;font-family:Fraunces,serif;margin:4px 0">4</p><p>Answer / appearance windows</p></div>
+      </div>
+      <table class="data">
+        <thead><tr><th>File</th><th>Playbook</th><th>Forum</th><th>Hard date</th><th>CiteLock</th><th>Supervisor</th></tr></thead>
+        <tbody>
+          <tr><td>Ramirez / N. Shore Receivables</td><td>Debt</td><td>Cook Law</td><td>11 days</td><td><span class="pill bad">1 blocked</span></td><td>Unassigned</td></tr>
+          <tr><td>Ortiz / Lakeside Holdings</td><td>Eviction</td><td>Cook Eviction</td><td>6 days</td><td><span class="pill ok">Clean</span></td><td>A. Chen, volunteer</td></tr>
+          <tr><td>Nguyen / Metro Credit</td><td>Debt</td><td>Cook 1st Mun.</td><td>3 days</td><td><span class="pill warn">Unread holding</span></td><td>Needs attorney</td></tr>
+          <tr><td>Brooks / Parkview Apts</td><td>Eviction</td><td>Cook Eviction</td><td>8 days</td><td><span class="pill ok">Clean</span></td><td>Self-help only</td></tr>
+          <tr><td>Diaz children — parenting packet</td><td>Family</td><td>Cook Domestic</td><td>Packet</td><td><span class="pill">No cites</span></td><td>Refer DV desk</td></tr>
+          <tr><td>Patel / Swift Recoveries</td><td>Debt</td><td>DuPage</td><td>14 days</td><td><span class="pill bad">2 blocked</span></td><td>Hold — do not file</td></tr>
+          <tr><td>Washington / Clover Mgmt</td><td>Eviction</td><td>Cook Eviction</td><td>2 days</td><td><span class="pill ok">Clean</span></td><td>Same-day clinic</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
